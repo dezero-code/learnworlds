@@ -29,14 +29,15 @@ Add these lines to composer.json file:
 
     // Learnworlds module
     'learnworlds' => [
-        'class' => '\dzlab\learnworlds\Module',
-        // 'class' => '\learnworlds\Module',
+        // 'class' => '\dzlab\learnworlds\Module',
+        'class' => '\learnworlds\Module',
     ],
 ```
 
 2) Add a new alias path in `/app/config/common/aliases.php`
 ```shell
-    'dzlab.learnworlds'  => DZ_BASE_PATH . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'dezero' . DIRECTORY_SEPARATOR . 'learnworlds',
+    'dzlab.learnworlds' => DZ_BASE_PATH . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'dezero' . DIRECTORY_SEPARATOR . 'learnworlds',
+    'learnworlds'       => DZ_BASE_PATH . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . 'learnworlds',
 ```
 
 3) Set new component in `/app/config/common/components.php`
@@ -82,14 +83,55 @@ Add these lines to composer.json file:
 # The API key for PRODUCTION environment
 LEARNWORLDS_API_CLIENT_ID="REPLACE_ME"
 LEARNWORLDS_API_CLIENT_SECRET="REPLACE_ME"
-LEARNWORLDS_API_CLIENT_URL="REPLACE_ME"
+LEARNWORLDS_API_URL="REPLACE_ME"
 
 # The API key for TEST (SANDBOX) environment
 LEARNWORLDS_SANDBOX_API_CLIENT_ID="REPLACE_ME"
 LEARNWORLDS_SANDBOX_API_CLIENT_SECRET="REPLACE_ME"
-LEARNWORLDS_SANDBOX_API_CLIENT_URL="REPLACE_ME"
+LEARNWORLDS_SANDBOX_API_URL="REPLACE_ME"
 ```
 
 6) Copy file `config/learnworlds.php` to your project directory `/app/config/components/learnworlds.php`. Open the copied file and add your config values, if needed.
 
 7) Optional. If it exists, copy the translation file from `messages/<language_id>/learnworlds.php` to `/app/<language_id>/learnworlds.php`
+
+8) Create a new directory in /app/modules/learnworlds path for this module and create a new Module.php file with this content:
+```shell
+<?php
+/**
+ * Module to integrate with Learnworlds API for DZ Framework
+ */
+
+namespace learnworlds;
+
+class Module extends \dzlab\learnworlds\Module
+{
+    /**
+     * User default view path
+     */
+    public $viewPath = null;
+
+
+    /**
+     * Default controller
+     */
+    // public $defaultController = 'sso';
+
+
+    /**
+     * Load specific CSS or JS files for this module
+     */
+    public $cssFiles = null;    // ['learnworlds.css'];
+    public $jsFiles = null;     // ['learnworlds.css'];
+
+
+    /**
+     * This method is called when the module is being created
+     * you may place code here to customize the module or the application
+     */
+    public function init()
+    {
+        parent::init();
+    }
+}
+```

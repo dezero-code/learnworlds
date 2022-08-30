@@ -12,7 +12,11 @@ class Module extends \dz\web\Module
     /**
      * @var array mapping from controller ID to controller configurations.
      */
-    public $controllerMap = [];
+    public $controllerMap = [
+        'sso' => [
+            'class' => 'dzlab\learnworlds\controllers\SsoController',
+        ],
+    ];
 
 
     /**
