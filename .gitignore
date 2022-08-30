@@ -16,6 +16,7 @@ Thumbs.db
 *.swp
 *.svn
 .svn
+.phpintel
 
 # Vim generated files #
 *.un~
