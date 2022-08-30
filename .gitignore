@@ -1,0 +1,56 @@
+# Composer
+/vendor
+composer.lock
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+/*.DS_Store
+ehthumbs.db
+.Spotlight-V100
+.Trashes
+Icon?
+Thumbs.db
+._*
+*.swp
+*.svn
+.svn
+
+# Vim generated files #
+*.un~
+
+
+# SASS
+.sass-cache
+*.css.map
+
+# COMPRESSED FILES
+/*.rar
+/*.zip
+
+# LOGS
+/*.log
+*.log
+
+# GRUNT
+/node_modules
+node_modules/
+
+# phpunit itself is not needed
+phpunit.phar
+# local phpunit config
+/phpunit.xml
+
+# Applications
+*.app
+*.exe
+*.war
+
+# Large media files
+*.mp4
+*.tiff
+*.avi
+*.flv
+*.mov
+*.wmv

@@ -1,0 +1,21 @@
+{
+    "name": "dezero/learnworlds",
+    "type": "dz-module",
+    "description" : "Learnworlds integration for DZ Framework",
+    "version": "0.1.0",
+    "authors" : [
+        {
+            "name": "Dezero",
+            "email": "fabian@dezero.es",
+            "homepage": "http://www.dezero.es"
+        }
+    ],
+    "require": {
+        "dezero/dz-core": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "dzlab\\learnworlds\\": "src/"
+        }
+    }
+}
