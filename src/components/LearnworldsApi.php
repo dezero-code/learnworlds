@@ -65,9 +65,6 @@ class LearnworldsApi extends RestClient
             $this->is_debug = $this->vec_config['is_debug'];
         }
 
-        // Auth URL to create API tokens
-        $this->auth_url = $this->base_url . '/admin/api/oauth2/access_token';
-
         // Sandbox environment?
         if ( isset($this->vec_config['is_sandbox']) )
         {
@@ -96,8 +93,10 @@ class LearnworldsApi extends RestClient
 
             // Base URL
             $this->base_url = getenv('LEARNWORLDS_API_URL');
-
         }
+
+        // Auth URL to create API tokens
+        $this->auth_url = $this->base_url . 'oauth2/access_token';
 
         parent::init();
     }
@@ -109,10 +108,11 @@ class LearnworldsApi extends RestClient
     public function beforeSend()
     {
         $this->client->setHeaders([
+            'Lw-Client'         => $this->api_key,
             'Authorization'     => $this->get_access_token(),
-            // 'PSU-IP-Address'    => Yii::app()->request->getUserHostAddress(),
-            'accept'            => 'application/json;charset=UTF-8',
             'Content-Type'      => 'application/json;charset=UTF-8',
+            // 'PSU-IP-Address'    => Yii::app()->request->getUserHostAddress(),
+            // 'accept'            => 'application/json;charset=UTF-8',
         ]);
 
         return parent::beforeSend();
@@ -126,22 +126,108 @@ class LearnworldsApi extends RestClient
      */
     public function post_sso($vec_input = [])
     {
-        /*
         // Endpoint and entity information
-        $this->entity_type = 'LemonwayAccount';
-        $endpoint_uri = '/v2/accounts/individual';
-        if ( $is_legal )
-        {
-            $endpoint_uri = '/v2/accounts/legal';
-        }
+        $this->entity_type = 'LearnworldsSso';
+        $endpoint_uri = '/sso';
 
         // Save last used endpoint
         $this->last_endpoint = $endpoint_uri;
 
         // Send request
         return $this->post($endpoint_uri, $vec_input);
-        */
     }
+
+
+    /**
+     * Returns the user specified by the provided user id.
+     *
+     * - API REST Endpoint "GET /v2/users/{id}"
+     *
+     * @see https://learnworlds.dev/docs/api/5281620efe003-get-a-user
+     */
+    public function get_user($learnworlds_user_id)
+    {
+        // Endpoint and entity information
+        $this->entity_type = 'LearnworldsUser';
+        $this->entity_id = $learnworlds_user_id;
+        $endpoint_uri = '/v2/users/'. $learnworlds_user_id;
+
+        // Save last used endpoint
+        $this->last_endpoint = $endpoint_uri;
+
+        // Send request
+        return $this->get($endpoint_uri);
+    }
+
+
+    /**
+     * Returns a list of all courses of the school.
+     *
+     * The courses are in sorted order, with the most recently
+     * created course appearing first, and the list is paginated,
+     * with a limit of 50 courses per page.
+     *
+     * - API REST Endpoint "GET /v2/courses"
+     *
+     * @see https://learnworlds.dev/docs/api/14ba192f977db-get-all-courses
+     */
+    public function get_courses()
+    {
+        // Endpoint
+        $this->entity_type = 'LearnworldsCourse';
+        $endpoint_uri = '/v2/courses';
+
+        // Save last used endpoint
+        $this->last_endpoint = $endpoint_uri;
+
+        // Send request
+        return $this->get($endpoint_uri);
+    }
+
+
+    /**
+     * Returns the user specified by the provided user id.
+     *
+     * - API REST Endpoint "GET /v2/courses/{id}"
+     *
+     * @see https://learnworlds.dev/docs/api/d73c769b071d6-get-a-course
+     */
+    public function get_course($learnworlds_course_id)
+    {
+        // Endpoint and entity information
+        $this->entity_type = 'LearnworldsCourse';
+        $this->entity_id = $learnworlds_course_id;
+        $endpoint_uri = '/v2/courses/'. $learnworlds_course_id;
+
+        // Save last used endpoint
+        $this->last_endpoint = $endpoint_uri;
+
+        // Send request
+        return $this->get($endpoint_uri);
+    }
+
+
+    /**
+     * Enroll user to product, regarding course, bundle, manual subscription
+     *
+     * - API REST Endpoint "POST /v2/users/{id}/enrollment"
+     *
+     * @see https://learnworlds.dev/docs/api/3d5e79f96b44a-enroll-user-to-product
+     */
+    public function post_enroll_to_product($learnworlds_user_id, $vec_input = [])
+    {
+        // Endpoint and entity information
+        $this->entity_type = 'LearnworldsUser';
+        $this->entity_id = $learnworlds_user_id;
+        $endpoint_uri = '/v2/users/'. $learnworlds_user_id .'/enrollment';
+
+        // Save last used endpoint
+        $this->last_endpoint = $endpoint_uri;
+
+        // Send request
+        return $this->post($endpoint_uri, $vec_input);
+    }
+
 
 
     /**
@@ -221,13 +307,15 @@ class LearnworldsApi extends RestClient
         $client->setMethod('POST');
         $client->setHeaders([
             'Lw-Client'     => $this->api_key,
-            'accept'        => 'application/json;charset=UTF-8',
-            'Content-Type'  => 'application/x-www-form-urlencoded'
+            // 'accept'        => 'application/json;charset=UTF-8',
+            // 'Content-Type'  => 'application/x-www-form-urlencoded'
         ]);
         $client->setParameterPost([
-            'client_id'     => $this->api_key,
-            'client_secret' => $this->auth_key,
-            'grant_type'    => 'client_credentials'
+            'data' => Json::encode([
+                'client_id'     => $this->api_key,
+                'client_secret' => $this->auth_key,
+                'grant_type'    => 'client_credentials'
+            ])
         ]);
 
         $response = $client->request();
