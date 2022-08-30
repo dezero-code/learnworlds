@@ -9,7 +9,7 @@ Add these lines to composer.json file:
 ```shell
 "require": {
     ...
-    "dezero/learnworlds": "dev-master"
+    "dezero/learnworlds": "dev-main"
     ...
 },
 "repositories":[
