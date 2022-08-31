@@ -120,6 +120,31 @@ class LearnworldsApi extends RestClient
 
 
     /**
+     * Custom event after sending HTTP request
+     */
+    public function afterSend()
+    {
+        // If some error -> SAVE LOG
+        if ( ! $this->is_last_action_success() )
+        {
+            $this->save_log('learnworlds');
+        }
+
+        // Register success requests
+        else if ( $this->is_debug )
+        {
+            $this->save_log('learnworlds_dev');
+        }
+
+        // Save all POST and PUT requests on database
+        if ( $this->method !== 'GET' )
+        {
+            $this->save_db_log('learnworlds');
+        }
+    }
+
+
+    /**
      * SSO with a User's Email or User ID
      *
      * @see https://learnworlds.dev/docs/api/58052c1c3066e-single-sign-on
