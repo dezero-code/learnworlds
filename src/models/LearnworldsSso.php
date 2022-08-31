@@ -9,32 +9,40 @@ use dz\db\DbCriteria;
 use dz\helpers\DateHelper;
 use dz\helpers\Log;
 use dz\helpers\StringHelper;
-use dzlab\learnworlds\models\_base\LearnworldsCourseUser as BaseLearnworldsCourseUser;
-use dzlab\learnworlds\models\LearnworldsCourse;
+use dzlab\learnworlds\models\_base\LearnworldsSso as BaseLearnworldsSso;
 use dzlab\learnworlds\models\LearnworldsUser;
 use user\models\User;
 use Yii;
 
 /**
- * LearnworldsCourseUser model class for "learnworlds_course_user" database table
+ * LearnworldsSso model class for "learnworlds_sso" database table
  *
- * Columns in table "learnworlds_course_user" available as properties of the model,
- * and there are no model relations.
+ * Columns in table "learnworlds_sso" available as properties of the model,
+ * followed by relations of table "learnworlds_sso" available as properties of the model.
  *
  * -------------------------------------------------------------------------
  * COLUMN FIELDS
  * -------------------------------------------------------------------------
- * @property string $learnworlds_course_id
- * @property string $learnworlds_user_id
+ * @property integer $learnworlds_sso_id
  * @property integer $user_id
+ * @property string $learnworlds_user_id
+ * @property string $email
+ * @property string $username
+ * @property string $redirect_url
+ * @property string $sso_url
  * @property integer $created_date
  * @property integer $created_uid
+ * @property integer $updated_date
+ * @property integer $updated_uid
  *
  * -------------------------------------------------------------------------
  * RELATIONS
  * -------------------------------------------------------------------------
+ * @property mixed $createdUser
+ * @property mixed $updatedUser
+ * @property mixed $user
  */
-class LearnworldsCourseUser extends BaseLearnworldsCourseUser
+class LearnworldsSso extends BaseLearnworldsSso
 {
 	/**
 	 * Constructor
@@ -51,11 +59,11 @@ class LearnworldsCourseUser extends BaseLearnworldsCourseUser
 	public function rules()
 	{
 		return [
-			['learnworlds_course_id, learnworlds_user_id, user_id, created_date, created_uid', 'required'],
-			['user_id, created_date, created_uid', 'numerical', 'integerOnly' => true],
-			['learnworlds_course_id', 'length', 'max'=> 255],
+			['user_id, learnworlds_user_id, email, username, redirect_url, sso_url, created_date, created_uid, updated_date, updated_uid', 'required'],
+			['user_id, created_date, created_uid, updated_date, updated_uid', 'numerical', 'integerOnly' => true],
 			['learnworlds_user_id', 'length', 'max'=> 32],
-			['learnworlds_course_id, learnworlds_user_id, user_id, created_date, created_uid', 'safe', 'on' => 'search'],
+			['email, username, redirect_url, sso_url', 'length', 'max'=> 255],
+			['learnworlds_sso_id, user_id, learnworlds_user_id, email, username, redirect_url, sso_url, created_date, created_uid, updated_date, updated_uid', 'safe', 'on' => 'search'],
 		];
 	}
 	
@@ -72,12 +80,12 @@ class LearnworldsCourseUser extends BaseLearnworldsCourseUser
 	public function relations()
 	{
 		return [
-            'course' => [self::BELONGS_TO, LearnworldsCourse::class, ['learnworlds_course_id' => 'learnworlds_course_id']],
-            'learnworldsCourse' => [self::BELONGS_TO, LearnworldsCourse::class, ['learnworlds_course_id' => 'learnworlds_course_id']],
-            'learnworldsUser' => [self::BELONGS_TO, LearnworldsUser::class, ['learnworlds_user_id' => 'learnworlds_user_id']],
-            'user' => [self::BELONGS_TO, User::class, ['user_id' => 'id']],
+			'createdUser' => [self::BELONGS_TO, User::class, ['created_uid' => 'id']],
+			'updatedUser' => [self::BELONGS_TO, User::class, ['updated_uid' => 'id']],
+			'user' => [self::BELONGS_TO, User::class, ['user_id' => 'id']],
 
             // Custom relations
+            'learnworldsUser' => [self::BELONGS_TO, LearnworldsUser::class, ['learnworlds_user_id' => 'learnworlds_user_id']],
 		];
 	}
 
@@ -108,11 +116,20 @@ class LearnworldsCourseUser extends BaseLearnworldsCourseUser
 	public function attributeLabels()
 	{
 		return [
-			'learnworlds_course_id' => null,
-			'learnworlds_user_id' => null,
+			'learnworlds_sso_id' => Yii::t('app', 'Learnworlds Sso'),
 			'user_id' => null,
+			'learnworlds_user_id' => Yii::t('app', 'Learnworlds User'),
+			'email' => Yii::t('app', 'Email'),
+			'username' => Yii::t('app', 'Username'),
+			'redirect_url' => Yii::t('app', 'Redirect Url'),
+			'sso_url' => Yii::t('app', 'Sso Url'),
 			'created_date' => Yii::t('app', 'Created Date'),
 			'created_uid' => null,
+			'updated_date' => Yii::t('app', 'Updated Date'),
+			'updated_uid' => null,
+			'createdUser' => null,
+			'updatedUser' => null,
+			'user' => null,
 		];
 	}
 
@@ -129,36 +146,43 @@ class LearnworldsCourseUser extends BaseLearnworldsCourseUser
         $criteria->with = [];
         // $criteria->together = true;
 
+        $criteria->compare('t.learnworlds_sso_id', $this->learnworlds_sso_id);
+        $criteria->compare('t.learnworlds_user_id', $this->learnworlds_user_id, true);
+        $criteria->compare('t.email', $this->email, true);
+        $criteria->compare('t.username', $this->username, true);
+        $criteria->compare('t.redirect_url', $this->redirect_url, true);
+        $criteria->compare('t.sso_url', $this->sso_url, true);
         $criteria->compare('t.created_date', $this->created_date);
+        $criteria->compare('t.updated_date', $this->updated_date);
 
         return new \CActiveDataProvider($this, [
             'criteria' => $criteria,
             'pagination' => ['pageSize' => 30],
-            'sort' => ['defaultOrder' => ['learnworlds_course_id' => true]]
+            'sort' => ['defaultOrder' => ['learnworlds_sso_id' => true]]
         ]);
     }
 
 
     /**
-     * LearnworldsCourseUser models list
+     * LearnworldsSso models list
      * 
      * @return array
      */
-    public function learnworldscourseuser_list($list_id = '')
+    public function learnworldssso_list($list_id = '')
     {
         $vec_output = [];
 
         $criteria = new DbCriteria;
-        $criteria->select = ['learnworlds_course_id', 'learnworlds_course_id', 'learnworlds_user_id'];
+        $criteria->select = ['learnworlds_sso_id', 'learnworlds_user_id'];
         // $criteria->order = 't.id ASC';
         // $criteria->condition = '';
         
-        $vec_models = LearnworldsCourseUser::model()->findAll($criteria);
+        $vec_models = LearnworldsSso::model()->findAll($criteria);
         if ( !empty($vec_models) )
         {
             foreach ( $vec_models as $que_model )
             {
-                $vec_output[$que_model->getAttribute('learnworlds_course_id')] = $que_model->title();
+                $vec_output[$que_model->getAttribute('learnworlds_sso_id')] = $que_model->title();
             }
         }
 

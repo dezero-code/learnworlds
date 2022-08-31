@@ -1,6 +1,6 @@
 <?php
 /**
- * @package dzlab\learnworlds\src\models 
+ * @package dzlab\learnworlds\models
  */
 
 namespace dzlab\learnworlds\models;
@@ -12,6 +12,7 @@ use dz\helpers\StringHelper;
 use dz\modules\api\models\LogApi;
 use dzlab\learnworlds\models\_base\LearnworldsUser as BaseLearnworldsUser;
 use dzlab\learnworlds\models\LearnworldsCourseUser;
+use dzlab\learnworlds\models\LearnworldsSso;
 use user\models\User;
 use Yii;
 
@@ -31,8 +32,6 @@ use Yii;
  * @property string $response_json
  * @property integer $last_sync_date
  * @property string $last_sync_endpoint
- * @property string $last_sso_url
- * @property integer $last_sso_date
  * @property integer $disable_date
  * @property integer $disable_uid
  * @property integer $created_date
@@ -67,14 +66,14 @@ class LearnworldsUser extends BaseLearnworldsUser
 	{
 		return [
 			['user_id, learnworlds_user_id, email, username, last_sync_date, last_sync_endpoint, created_date, created_uid, updated_date, updated_uid', 'required'],
-			['user_id, last_sync_date, last_sso_date, disable_date, disable_uid, created_date, created_uid, updated_date, updated_uid', 'numerical', 'integerOnly' => true],
+			['user_id, last_sync_date, disable_date, disable_uid, created_date, created_uid, updated_date, updated_uid', 'numerical', 'integerOnly' => true],
 			['learnworlds_user_id', 'length', 'max'=> 32],
-			['email, username, last_sso_url', 'length', 'max'=> 255],
+			['email, username', 'length', 'max'=> 255],
 			['last_sync_endpoint', 'length', 'max'=> 128],
 			['uuid', 'length', 'max'=> 36],
-			['response_json, last_sso_url, last_sso_date, disable_date, disable_uid, uuid', 'default', 'setOnEmpty' => true, 'value' => null],
+			['response_json, disable_date, disable_uid, uuid', 'default', 'setOnEmpty' => true, 'value' => null],
 			['response_json', 'safe'],
-			['user_id, learnworlds_user_id, email, username, response_json, last_sync_date, last_sync_endpoint, last_sso_url, last_sso_date, disable_date, disable_uid, created_date, created_uid, updated_date, updated_uid, uuid', 'safe', 'on' => 'search'],
+			['user_id, learnworlds_user_id, email, username, response_json, last_sync_date, last_sync_endpoint, disable_date, disable_uid, created_date, created_uid, updated_date, updated_uid, uuid', 'safe', 'on' => 'search'],
 		];
 	}
 	
@@ -99,6 +98,10 @@ class LearnworldsUser extends BaseLearnworldsUser
             // Custom relations
             'courses' => [self::HAS_MANY, LearnworldsCourseUser::class, ['learnworlds_user_id' => 'learnworlds_user_id']],
             'logsApi' => [self::HAS_MANY, LogApi::class, ['entity_id' => 'user_id'], 'condition' => 'logsApi.entity_type = "LearnworldsUser"', 'order' => 'logsApi.created_date DESC'],
+
+            // Single Sign-on (SSO)
+            'ssos' => [self::HAS_MANY, LearnworldsSso::class, 'user_id'],
+            'lastSso' => [self::BELONGS_TO, LearnworldsSso::class, ['user_id' => 'user_id'], 'order' => 'lastSso.learnworlds_sso_id DESC'],
 		];
 	}
 
@@ -135,8 +138,6 @@ class LearnworldsUser extends BaseLearnworldsUser
 			'response_json' => Yii::t('app', 'Response Json'),
 			'last_sync_date' => Yii::t('app', 'Last Sync Date'),
 			'last_sync_endpoint' => Yii::t('app', 'Last Sync Endpoint'),
-			'last_sso_url' => Yii::t('app', 'Last Sso Url'),
-			'last_sso_date' => Yii::t('app', 'Last Sso Date'),
 			'disable_date' => Yii::t('app', 'Disable Date'),
 			'disable_uid' => null,
 			'created_date' => Yii::t('app', 'Created Date'),
@@ -170,8 +171,6 @@ class LearnworldsUser extends BaseLearnworldsUser
         $criteria->compare('t.response_json', $this->response_json, true);
         $criteria->compare('t.last_sync_date', $this->last_sync_date);
         $criteria->compare('t.last_sync_endpoint', $this->last_sync_endpoint, true);
-        $criteria->compare('t.last_sso_url', $this->last_sso_url, true);
-        $criteria->compare('t.last_sso_date', $this->last_sso_date);
         $criteria->compare('t.disable_date', $this->disable_date);
         $criteria->compare('t.created_date', $this->created_date);
         $criteria->compare('t.updated_date', $this->updated_date);

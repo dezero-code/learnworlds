@@ -1,6 +1,6 @@
 <?php
 /**
- * @package dzlab\learnworlds\src\models 
+ * @package dzlab\learnworlds\models
  */
 
 namespace dzlab\learnworlds\models;

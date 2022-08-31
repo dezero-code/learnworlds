@@ -28,8 +28,6 @@ class m220831_070819_learnworlds_schema extends Migration
             'response_json' => $this->text(),
             'last_sync_date' => $this->date()->notNull(),
             'last_sync_endpoint' => $this->string(128)->notNull(),
-            'last_sso_url' => $this->string(),
-            'last_sso_date' => $this->date(),
             'disable_date' => $this->date(),
             'disable_uid' => $this->integer()->unsigned(),
             'created_date' => $this->date()->notNull(),
