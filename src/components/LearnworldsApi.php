@@ -22,6 +22,11 @@ use Yii;
 class LearnworldsApi extends RestClient
 {
     /**
+     * @var string. Learnworlds school URL
+     */
+    public $school_url;
+
+    /**
      * @var string. Auth URL to create API tokens
      */
     public $auth_url;
@@ -82,6 +87,8 @@ class LearnworldsApi extends RestClient
             // Base URL
             $this->base_url = getenv('LEARNWORLDS_SANDBOX_API_URL');
 
+            // School URL
+            $this->school_url = getenv('LEARNWORLDS_SANDBOX_SCHOOL_URL');
         }
         else
         {
@@ -93,6 +100,9 @@ class LearnworldsApi extends RestClient
 
             // Base URL
             $this->base_url = getenv('LEARNWORLDS_API_URL');
+
+            // School URL
+            $this->school_url = getenv('LEARNWORLDS_SCHOOL_URL');
         }
 
         // Auth URL to create API tokens

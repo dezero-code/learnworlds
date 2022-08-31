@@ -84,11 +84,13 @@ Add these lines to composer.json file:
 LEARNWORLDS_API_CLIENT_ID="REPLACE_ME"
 LEARNWORLDS_API_CLIENT_SECRET="REPLACE_ME"
 LEARNWORLDS_API_URL="REPLACE_ME"
+LEARNWORLDS_SCHOOL_URL="REPLACE_ME"
 
 # The API key for TEST (SANDBOX) environment
 LEARNWORLDS_SANDBOX_API_CLIENT_ID="REPLACE_ME"
 LEARNWORLDS_SANDBOX_API_CLIENT_SECRET="REPLACE_ME"
 LEARNWORLDS_SANDBOX_API_URL="REPLACE_ME"
+LEARNWORLDS_SANDBOX_SCHOOL_URL="REPLACE_ME"
 ```
 
 6) Copy file `config/learnworlds.php` to your project directory `/app/config/components/learnworlds.php`. Open the copied file and add your config values, if needed.

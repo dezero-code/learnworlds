@@ -75,6 +75,33 @@ class LearnworldsComponent extends ApplicationComponent
 
 
     /**
+     * Get last EHttpResponse object
+     */
+    public function get_response()
+    {
+        return $this->api->get_response();
+    }
+
+
+    /**
+     * Process and return response data into an array
+     */
+    public function get_response_body($is_json = true)
+    {
+       return $this->api->get_response_body($is_json);
+    }
+
+
+    /**
+     * Get last used endpoint
+     */
+    public function get_last_endpoint()
+    {
+        return $this->api->last_endpoint;
+    }
+
+
+    /**
      * Single Sign-on process.
      * Returns an unique URL to make the SSO automatically
      *
@@ -82,11 +109,17 @@ class LearnworldsComponent extends ApplicationComponent
      *
      * @see LearnworldsApi::post_sso()
      */
-    public function sso($user_id, $redirect_url)
+    public function sso($user_id, $redirect_url = null)
     {
         $user_model = User::findOne($user_id);
         if ( $user_model )
         {
+            // Redirect URL will be the Learnworlds school URL
+            if ( $redirect_url === null )
+            {
+                $redirect_url = $this->api->school_url;
+            }
+
             // Send a "POST /sso" request
             $vec_input = [
                 'email'         => $user_model->email(),
