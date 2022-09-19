@@ -35,5 +35,14 @@ class SsoController extends Controller
 
         // Enroll user to product (adds a new course inscription)
         dd(Yii::app()->learnworlds->enroll_to_course(2115, 'curso-de-prueba'));
+
+        // Return user's enrollments
+        // dd(Yii::app()->learnworlds->get_user_enrollments(2115));
+
+        // Unenroll user from product (deletes the course inscription)
+        // dd(Yii::app()->learnworlds->unenroll_from_course(2115, 'curso-de-prueba'));
+
+        // Check if an user is enrolled to a Learnworlds course
+        // dd(Yii::app()->learnworlds->is_user_enrolled(2115, 'curso-de-prueba'));
     }
 }

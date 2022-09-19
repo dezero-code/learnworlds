@@ -18,7 +18,7 @@ use dz\helpers\Url;
 use user\models\User;
 use dzlab\learnworlds\models\LearnworldsCourse;
 use dzlab\learnworlds\models\LearnworldsCourseUser;
-use dzlab\learnworlds\models\LearnworldsSSo;
+use dzlab\learnworlds\models\LearnworldsSso;
 use dzlab\learnworlds\models\LearnworldsUser;
 use Yii;
 
@@ -150,7 +150,7 @@ class LearnworldsComponent extends ApplicationComponent
                     }
                     else
                     {
-                        $learnworlds_sso_model = Yii::createObject(LearnworldsSSo::class);
+                        $learnworlds_sso_model = Yii::createObject(LearnworldsSso::class);
                         $learnworlds_sso_model->setAttributes([
                             'user_id'               => $user_id,
                             'learnworlds_user_id'   => $vec_response['user_id'],
@@ -307,7 +307,7 @@ class LearnworldsComponent extends ApplicationComponent
             if ( !empty($vec_response) && isset($vec_response['id']) && isset($vec_response['title']) && isset($vec_response['final_price']) )
             {
                 // Return model
-                return $this->save_course($vec_response);
+                return $this->_save_course($vec_response);
             }
             else if ( $this->is_debug )
             {
@@ -360,7 +360,7 @@ class LearnworldsComponent extends ApplicationComponent
                 {
                     foreach ( $vec_response['data'] as $que_course_response )
                     {
-                        $learnworlds_course_model = $this->save_course($que_course_response);
+                        $learnworlds_course_model = $this->_save_course($que_course_response);
                         if ( $learnworlds_course_model !== null )
                         {
                             $vec_course_models[$learnworlds_course_model->learnworlds_course_id] = $learnworlds_course_model;
@@ -396,7 +396,7 @@ class LearnworldsComponent extends ApplicationComponent
         $learnworlds_course_model = $this->get_course($learnworlds_course_id);
         if ( $user_model && $learnworlds_user_model && $learnworlds_course_model )
         {
-            // Send a "GET /v2/courses" request
+            // Send a "POST /v2/users/{id}/enrollment" request
             $vec_input = [
                 'productId'     => $learnworlds_course_id,
                 'productType'   => 'course',
@@ -420,24 +420,8 @@ class LearnworldsComponent extends ApplicationComponent
                 // Save LearnworldsCourseUser model
                 if ( !empty($vec_response) && isset($vec_response['success']) && $vec_response['success'] === true )
                 {
-                    $learnworlds_course_user_model = Yii::createObject(LearnworldsCourseUser::class);
-                    $learnworlds_course_user_model->setAttributes([
-                        'learnworlds_course_id' => $learnworlds_course_id,
-                        'learnworlds_user_id'   => $learnworlds_user_model->learnworlds_user_id,
-                        'user_id'               => $user_id
-                    ]);
-                    if ( ! $learnworlds_course_user_model->save() )
-                    {
-                        Log::save_model_error($learnworlds_course_user_model);
-                    }
-                    else
-                    {
-                        // Save entity information (useful for logs)
-                        $this->api->save_entity_info('LearnworldsCourseUser', $user_id);
-                    }
-
                     // Return LearnworldsCourseUser model
-                    return $learnworlds_course_user_model;
+                    return $this->_save_enroll($learnworlds_course_model, $learnworlds_user_model);
                 }
                 else
                 {
@@ -472,9 +456,178 @@ class LearnworldsComponent extends ApplicationComponent
 
 
     /**
+     * Unenroll user from product
+     *
+     * - API REST Endpoint "DELETE /v2/users/{id}/enrollment"
+     *
+     * @see LearnworldsApi::delete_unenroll_from_product()
+     */
+    public function unenroll_from_course($user_id, $learnworlds_course_id)
+    {
+        $user_model = User::findOne($user_id);
+        $learnworlds_user_model = LearnworldsUser::findOne($user_id);
+        $learnworlds_course_model = $this->get_course($learnworlds_course_id);
+        if ( $user_model && $learnworlds_user_model && $learnworlds_course_model )
+        {
+             // Send a "DELETE /v2/users/{id}/enrollment" request
+            $vec_input = [
+                'productId'     => $learnworlds_course_id,
+                'productType'   => 'course',
+            ];
+            $response = $this->api->delete_unenroll_from_product($learnworlds_user_model->learnworlds_user_id, $vec_input);
+
+            // Update the model with last received data
+            if ( $this->api->is_last_action_success() )
+            {
+                $vec_response = $this->api->get_response_body(true);
+
+                if ( $this->is_debug )
+                {
+                    Log::learnworlds_dev("LearnworldsComponent::unenroll_from_course({$user_id}, {$learnworlds_course_id}) - Last action success");
+                    Log::learnworlds_dev(print_r($vec_response, true));
+                }
+
+                // Delete LearnworldsCourseUser model
+                if ( !empty($vec_response) && isset($vec_response['success']) && $vec_response['success'] === true )
+                {
+                    // Return LearnworldsCourseUser model
+                    return _save_enroll($learnworlds_course_model, $learnworlds_user_model);
+                }
+                else
+                {
+                    Log::learnworlds_dev("LearnworldsComponent::unenroll_from_course({$user_id}, {$learnworlds_course_id}) - Incorrect response: ". print_r($vec_response, true));
+                }
+            }
+            else if ( $this->is_debug )
+            {
+                Log::learnworlds_dev("LearnworldsComponent::unenroll_from_course({$user_id}, {$learnworlds_course_id}) - Last action error: ". print_r($response, true));
+            }
+        }
+        else
+        {
+            if ( ! $user_model )
+            {
+                Log::learnworlds_error("LearnworldsComponent::unenroll_from_course({$user_id}, {$learnworlds_course_id}) - USER does not exist: {$user_id}");
+            }
+
+            if ( ! $learnworlds_user_model )
+            {
+                Log::learnworlds_error("LearnworldsComponent::unenroll_from_course({$user_id}, {$learnworlds_course_id}) - LEARNWORLDS USER does not exist for user #{$user_id}");
+            }
+
+            if ( ! $learnworlds_course_model )
+            {
+                Log::learnworlds_error("LearnworldsComponent::unenroll_from_course({$user_id}, {$learnworlds_course_id}) - LEARNWORLDS COURSE does not exist with id '{$learnworlds_course_id}'");
+            }
+        }
+
+        return null;
+    }
+
+
+    /**
+     * Get products (couses enrollments) of user.
+     *
+     * - API REST Endpoint "POST /v2/users/{id}/products"
+     *
+     * @see https://learnworlds.dev/docs/api/7e63f13919cdd-get-courses-enrollments-of-user
+     */
+    public function get_user_enrollments($user_id)
+    {
+        $vec_output = [];
+        $user_model = User::findOne($user_id);
+        $learnworlds_user_model = LearnworldsUser::findOne($user_id);
+        if ( $user_model && $learnworlds_user_model )
+        {
+            // Send a "GET /v2/users/{id}/courses" request
+            $response = $this->api->get_enrollments($learnworlds_user_model->learnworlds_user_id);
+
+            // Update the model with last received data
+            if ( $this->api->is_last_action_success() )
+            {
+                $vec_response = $this->api->get_response_body(true);
+                // dd($vec_response);
+
+                if ( $this->is_debug )
+                {
+                    Log::learnworlds_dev("LearnworldsComponent::get_user_enrollments({$user_id}) - Last action success");
+                    Log::learnworlds_dev(print_r($vec_response, true));
+                }
+
+                // Create/update enrollments (LearnworldsCourseUser models)
+                if ( !empty($vec_response) && isset($vec_response['data']) )
+                {
+                    if ( !empty($vec_response['data']) )
+                    {
+                        foreach ( $vec_response['data'] as $que_product_response )
+                        {
+                            // Check if course exists
+                            if ( isset($que_product_response['id']) && isset($que_product_response['type']) && $que_product_response['type'] === 'course' )
+                            {
+                                $learnworlds_course_model = $this->get_course($que_product_response['id']);
+                                if ( $learnworlds_course_model )
+                                {
+                                    $learnworlds_course_user_model = $this->_save_enroll($learnworlds_course_model, $learnworlds_user_model);
+                                    if ( $learnworlds_course_user_model !== null )
+                                    {
+                                        $vec_output[$learnworlds_course_model->learnworlds_course_id] = $learnworlds_course_user_model;
+                                    }
+                                }
+                                else
+                                {
+                                    $course_id = $que_product_response['id'];
+                                    Log::learnworlds_error("LearnworldsComponent::get_user_enrollments({$user_id}) - LEARNWORLDS COURSE does not exist for course {$course_id}");
+                                }
+                            }
+                            else
+                            {
+                                Log::learnworlds_dev("LearnworldsComponent::get_user_enrollments({$user_id}) - Incorrect response for a course item: ". print_r($que_product_response, true));
+                            }
+                        }
+                    }
+                }
+                else if ( $this->is_debug )
+                {
+                    Log::learnworlds_dev("LearnworldsComponent::get_user_enrollments({$user_id}) - Incorrect response: ". print_r($vec_response, true));
+                }
+            }
+            else if ( $this->is_debug )
+            {
+                Log::learnworlds_dev("LearnworldsComponent::get_user_enrollments({$user_id}) - Last action error: ". print_r($response, true));
+            }
+        }
+        else
+        {
+            if ( ! $user_model )
+            {
+                Log::learnworlds_error("LearnworldsComponent::get_user_enrollments({$user_id}) - USER does not exist: {$user_id}");
+            }
+
+            if ( ! $learnworlds_user_model )
+            {
+                Log::learnworlds_error("LearnworldsComponent::get_user_enrollments({$user_id}) - LEARNWORLDS USER does not exist for user #{$user_id}");
+            }
+        }
+
+        return $vec_output;
+    }
+
+
+    /**
+     * Check if an user is enrolled to a Learnworlds course
+     */
+    public function is_user_enrolled($user_id, $learnworlds_course_id)
+    {
+        $vec_user_enrollments = Yii::app()->learnworlds->get_user_enrollments($user_id);
+
+        return !empty($vec_user_enrollments) && isset($vec_user_enrollments[$learnworlds_course_id]);
+    }
+
+
+    /**
      * Create or update a LearnworldsCourse model
      */
-    private function save_course($vec_data)
+    private function _save_course($vec_data)
     {
         // Create/update LearnworldsCourse model
         if ( !empty($vec_data) && isset($vec_data['id']) && isset($vec_data['title']) && isset($vec_data['final_price']) )
@@ -508,9 +661,45 @@ class LearnworldsComponent extends ApplicationComponent
         }
         else if ( $this->is_debug )
         {
-            Log::learnworlds_dev("LearnworldsComponent::save_course() for course with id '{$learnworlds_course_id}'' - Incorrect response: ". print_r($vec_data, true));
+            Log::learnworlds_dev("LearnworldsComponent::_save_course() for course with id '{$learnworlds_course_id}'' - Incorrect response: ". print_r($vec_data, true));
         }
 
         return null;
+    }
+
+
+    /**
+     * Create or update an enrollment (LearnworldsCourseUser model)
+     */
+    private function _save_enroll($learnworlds_course_model, $learnworlds_user_model)
+    {
+        $learnworlds_course_user_model = LearnworldsCourseUser::get()
+            ->where([
+                'learnworlds_course_id' => $learnworlds_course_model->learnworlds_course_id,
+                'learnworlds_user_id'   => $learnworlds_user_model->learnworlds_user_id,
+            ])
+            ->one();
+
+        if ( ! $learnworlds_course_model )
+        {
+            $learnworlds_course_user_model = Yii::createObject(LearnworldsCourseUser::class);
+            $learnworlds_course_user_model->setAttributes([
+                'learnworlds_course_id' => $learnworlds_course_model->learnworlds_course_id,
+                'learnworlds_user_id'   => $learnworlds_user_model->learnworlds_user_id,
+                'user_id'               => $learnworlds_user_model->user_id
+            ]);
+
+            if ( ! $learnworlds_course_user_model->save() )
+            {
+                Log::save_model_error($learnworlds_course_user_model);
+            }
+            else
+            {
+                // Save entity information (useful for logs)
+                $this->api->save_entity_info('LearnworldsCourseUser', $learnworlds_user_model->user_id);
+            }
+        }
+
+        return $learnworlds_course_user_model;
     }
 }

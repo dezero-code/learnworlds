@@ -155,6 +155,26 @@ class LearnworldsApi extends RestClient
 
 
     /**
+     * Check if last action was succedded
+     */
+    public function is_last_action_success()
+    {
+        // HTTP response is OK
+        if ( $this->response && $this->response->isSuccessful() )
+        {
+            // Check if error has been returned into the response
+            $last_error = $this->get_last_error();
+            if ( empty($last_error) )
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+    /**
      * SSO with a User's Email or User ID
      *
      * @see https://learnworlds.dev/docs/api/58052c1c3066e-single-sign-on
@@ -259,10 +279,53 @@ class LearnworldsApi extends RestClient
         // Save last used endpoint
         $this->last_endpoint = $endpoint_uri;
 
-        // Send request
+        // Send request via POST
         return $this->post($endpoint_uri, $vec_input);
     }
 
+
+    /**
+     * Unenroll user from product
+     *
+     * - API REST Endpoint "DELETE /v2/users/{id}/enrollment"
+     *
+     * @see https://learnworlds.dev/docs/api/d25a61227d784-unenroll-user-from-product
+     */
+    public function delete_unenroll_from_product($learnworlds_user_id, $vec_input = [])
+    {
+        // Endpoint and entity information
+        $this->entity_type = 'LearnworldsUser';
+        $this->entity_id = $learnworlds_user_id;
+        $endpoint_uri = '/v2/users/'. $learnworlds_user_id .'/enrollment';
+
+        // Save last used endpoint
+        $this->last_endpoint = $endpoint_uri;
+
+        // Send request via DELETE
+        return $this->delete($endpoint_uri, $vec_input);
+    }
+
+
+    /**
+     * Get products (couses enrollments) of user.
+     *
+     * - API REST Endpoint "GET /v2/users/{id}/products"
+     *
+     * @see https://learnworlds.dev/docs/api/3913e24f15a8a-get-products-of-user
+     */
+    public function get_enrollments($learnworlds_user_id)
+    {
+        // Endpoint and entity information
+        $this->entity_type = 'LearnworldsUser';
+        $this->entity_id = $learnworlds_user_id;
+        $endpoint_uri = '/v2/users/'. $learnworlds_user_id .'/products';
+
+        // Save last used endpoint
+        $this->last_endpoint = $endpoint_uri;
+
+        // Send request
+        return $this->get($endpoint_uri);
+    }
 
 
     /**
