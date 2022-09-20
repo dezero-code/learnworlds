@@ -155,22 +155,16 @@ class LearnworldsApi extends RestClient
 
 
     /**
-     * Check if last action was succedded
+     * Return last Learnworlds error
      */
-    public function is_last_action_success()
+    public function get_last_error()
     {
-        // HTTP response is OK
-        if ( $this->response && $this->response->isSuccessful() )
+        if ( ! empty($this->last_error) && $this->response && ! $this->response->isSuccessful() )
         {
-            // Check if error has been returned into the response
-            $last_error = $this->get_last_error();
-            if ( empty($last_error) )
-            {
-                return true;
-            }
+            $this->last_error = trim($this->response->getBody());
         }
 
-        return false;
+        return $this->last_error;
     }
 
 

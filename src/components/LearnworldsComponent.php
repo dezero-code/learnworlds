@@ -182,7 +182,7 @@ class LearnworldsComponent extends ApplicationComponent
             }
             else if ( $this->is_debug )
             {
-                Log::learnworlds_dev("LearnworldsComponent::sso({$user_id}, {$redirect_url}) - Last action error: ". print_r($response, true));
+                Log::learnworlds_dev("LearnworldsComponent::sso({$user_id}, {$redirect_url}) - Last action error: ". print_r($this->api->get_last_error(), true));
             }
         }
         else
@@ -267,7 +267,7 @@ class LearnworldsComponent extends ApplicationComponent
             }
             else if ( $this->is_debug )
             {
-                Log::learnworlds_dev("LearnworldsComponent::get_user({$user_id}, {$learnworlds_user_id}) - Last action error: ". print_r($response, true));
+                Log::learnworlds_dev("LearnworldsComponent::get_user({$user_id}, {$learnworlds_user_id}) - Last action error: ". print_r($this->api->get_last_error(), true));
             }
         }
         else
@@ -316,7 +316,7 @@ class LearnworldsComponent extends ApplicationComponent
         }
         else if ( $this->is_debug )
         {
-            Log::learnworlds_dev("LearnworldsComponent::get_course({$learnworlds_course_id}) - Last action error: ". print_r($response, true));
+            Log::learnworlds_dev("LearnworldsComponent::get_course({$learnworlds_course_id}) - Last action error: ". print_r($this->api->get_last_error(), true));
         }
 
         return null;
@@ -375,7 +375,7 @@ class LearnworldsComponent extends ApplicationComponent
         }
         else if ( $this->is_debug )
         {
-            Log::learnworlds_dev("LearnworldsComponent::get_courses() - Last action error: ". print_r($response, true));
+            Log::learnworlds_dev("LearnworldsComponent::get_courses() - Last action error: ". print_r($this->api->get_last_error(), true));
         }
 
         return $vec_course_models;
@@ -393,7 +393,12 @@ class LearnworldsComponent extends ApplicationComponent
     {
         $user_model = User::findOne($user_id);
         $learnworlds_user_model = LearnworldsUser::findOne($user_id);
-        $learnworlds_course_model = $this->get_course($learnworlds_course_id);
+        $learnworlds_course_model = LearnworldsCourse::findOne($learnworlds_course_id);
+        if ( ! $learnworlds_course_model )
+        {
+            $learnworlds_course_model = $this->get_course($learnworlds_course_id);
+        }
+
         if ( $user_model && $learnworlds_user_model && $learnworlds_course_model )
         {
             // Send a "POST /v2/users/{id}/enrollment" request
@@ -430,7 +435,7 @@ class LearnworldsComponent extends ApplicationComponent
             }
             else if ( $this->is_debug )
             {
-                Log::learnworlds_dev("LearnworldsComponent::enroll_to_course({$user_id}, {$learnworlds_course_id}) - Last action error: ". print_r($response, true));
+                Log::learnworlds_dev("LearnworldsComponent::enroll_to_course({$user_id}, {$learnworlds_course_id}) - Last action error: ". print_r($this->api->get_last_error(), true));
             }
         }
         else
@@ -466,7 +471,12 @@ class LearnworldsComponent extends ApplicationComponent
     {
         $user_model = User::findOne($user_id);
         $learnworlds_user_model = LearnworldsUser::findOne($user_id);
-        $learnworlds_course_model = $this->get_course($learnworlds_course_id);
+        $learnworlds_course_model = LearnworldsCourse::findOne($learnworlds_course_id);
+        if ( ! $learnworlds_course_model )
+        {
+            $learnworlds_course_model = $this->get_course($learnworlds_course_id);
+        }
+
         if ( $user_model && $learnworlds_user_model && $learnworlds_course_model )
         {
              // Send a "DELETE /v2/users/{id}/enrollment" request
@@ -500,7 +510,7 @@ class LearnworldsComponent extends ApplicationComponent
             }
             else if ( $this->is_debug )
             {
-                Log::learnworlds_dev("LearnworldsComponent::unenroll_from_course({$user_id}, {$learnworlds_course_id}) - Last action error: ". print_r($response, true));
+                Log::learnworlds_dev("LearnworldsComponent::unenroll_from_course({$user_id}, {$learnworlds_course_id}) - Last action error: ". print_r($this->api->get_last_error(), true));
             }
         }
         else
@@ -593,7 +603,7 @@ class LearnworldsComponent extends ApplicationComponent
             }
             else if ( $this->is_debug )
             {
-                Log::learnworlds_dev("LearnworldsComponent::get_user_enrollments({$user_id}) - Last action error: ". print_r($response, true));
+                Log::learnworlds_dev("LearnworldsComponent::get_user_enrollments({$user_id}) - Last action error: ". print_r($this->api->get_last_error(), true));
             }
         }
         else
@@ -618,7 +628,11 @@ class LearnworldsComponent extends ApplicationComponent
      */
     public function is_user_enrolled($user_id, $learnworlds_course_id)
     {
+        // Get courses (product enrollments)
         $vec_user_enrollments = Yii::app()->learnworlds->get_user_enrollments($user_id);
+
+        // Clear last error, if it has not been found any course
+        $this->api->clear_last_error();
 
         return !empty($vec_user_enrollments) && isset($vec_user_enrollments[$learnworlds_course_id]);
     }
@@ -680,7 +694,7 @@ class LearnworldsComponent extends ApplicationComponent
             ])
             ->one();
 
-        if ( ! $learnworlds_course_model )
+        if ( ! $learnworlds_course_user_model )
         {
             $learnworlds_course_user_model = Yii::createObject(LearnworldsCourseUser::class);
             $learnworlds_course_user_model->setAttributes([

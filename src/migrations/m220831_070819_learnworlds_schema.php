@@ -1,4 +1,4 @@
-<?php
+g<?php
 /**
  * Migration class m220831_070819_learnworlds_schema
  *
@@ -97,7 +97,6 @@ class m220831_070819_learnworlds_schema extends Migration
 
         // Create FOREIGN KEYS
         $this->addForeignKey(null, 'learnworlds_course_user', ['learnworlds_course_id'], 'learnworlds_course', ['learnworlds_course_id'], 'CASCADE', null);
-        $this->addForeignKey(null, 'learnworlds_course_user', ['learnworlds_user_id'], 'learnworlds_user', ['learnworlds_user_id'], 'CASCADE', null);
         $this->addForeignKey(null, 'learnworlds_course_user', ['user_id'], 'user_users', ['id'], 'CASCADE', null);
         $this->addForeignKey(null, 'learnworlds_course_user', ['created_uid'], 'user_users', ['id'], 'CASCADE', null);
 
