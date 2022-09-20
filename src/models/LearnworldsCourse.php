@@ -226,6 +226,20 @@ class LearnworldsCourse extends BaseLearnworldsCourse
 
 
     /**
+     * Return Learnworlds course URL
+     */
+    public function url()
+    {
+        $school_url = Yii::app()->learnworldsApi->school_url;
+        if ( !preg_match("/\/$/", $school_url) )
+        {
+            $school_url = $school_url .'/';
+        }
+        return $school_url .'course/'. $this->learnworlds_course_id;
+    }
+
+
+    /**
      * Title used for this model
      */
     public function title()
