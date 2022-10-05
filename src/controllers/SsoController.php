@@ -21,29 +21,34 @@ class SsoController extends Controller
      */
     public function actionIndex()
     {
-        // SSO with user 2115 - fabian+newpass@dezero.es
-        // dd(Yii::app()->learnworlds->sso(2115, 'https://sandbox-futureforwork.mylearnworlds.com/'));
+        if ( Yii::app()->user->id == 1 )
+        {
+            d("dzlab\learnworlds\controllers\SsoController::actionIndex()");
 
-        // Return user information
-        // dd(Yii::app()->learnworlds->get_user(2115, '630e29b8f4d2cfe0e900eb7b'));
+            // SSO with user 2115 - fabian+newpass@dezero.es
+            // dd(Yii::app()->learnworlds->sso(2115, 'https://sandbox-futureforwork.mylearnworlds.com/'));
 
-        // Return a full list of courses
-        // $learnworlds_course_model = Yii::app()->learnworlds->get_course('curso-de-prueba'));
-        // dd(Yii::app()->learnworlds->get_courses());
+            // Return user information
+            // dd(Yii::app()->learnworlds->get_user(2115, '630e29b8f4d2cfe0e900eb7b'));
 
-        // Return course information
-        // dd(Yii::app()->learnworlds->get_course('curso-de-prueba'));
+            // Return a full list of courses
+            // $learnworlds_course_model = Yii::app()->learnworlds->get_course('curso-de-prueba'));
+            dd(Yii::app()->learnworlds->get_courses());
 
-        // Enroll user to product (adds a new course inscription)
-        // dd(Yii::app()->learnworlds->enroll_to_course(2115, 'curso-de-prueba'));
+            // Return course information
+            // dd(Yii::app()->learnworlds->get_course('curso-de-prueba'));
 
-        // Return user's enrollments
-        // dd(Yii::app()->learnworlds->get_user_enrollments(2115));
+            // Enroll user to product (adds a new course inscription)
+            // dd(Yii::app()->learnworlds->enroll_to_course(2115, 'curso-de-prueba'));
 
-        // Unenroll user from product (deletes the course inscription)
-        // dd(Yii::app()->learnworlds->unenroll_from_course(2115, 'curso-de-prueba'));
+            // Return user's enrollments
+            // dd(Yii::app()->learnworlds->get_user_enrollments(2115));
 
-        // Check if an user is enrolled to a Learnworlds course
-        // dd(Yii::app()->learnworlds->is_user_enrolled(2115, 'curso-de-prueba'));
+            // Unenroll user from product (deletes the course inscription)
+            // dd(Yii::app()->learnworlds->unenroll_from_course(2115, 'curso-de-prueba'));
+
+            // Check if an user is enrolled to a Learnworlds course
+            // dd(Yii::app()->learnworlds->is_user_enrolled(2115, 'curso-de-prueba'));
+        }
     }
 }
