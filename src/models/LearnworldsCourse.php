@@ -235,7 +235,8 @@ class LearnworldsCourse extends BaseLearnworldsCourse
         {
             $school_url = $school_url .'/';
         }
-        return $school_url .'course/'. $this->learnworlds_course_id;
+        // return $school_url .'course/'. $this->learnworlds_course_id;
+        return $school_url .'course?course_id='. $this->learnworlds_course_id;
     }
 
 
