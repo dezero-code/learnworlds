@@ -383,6 +383,72 @@ class LearnworldsComponent extends ApplicationComponent
 
 
     /**
+     * Get users enrolled to an course
+     *
+     * - API REST Endpoint "GET /v2/courses/{id}/users"
+     *
+     * @see https://learnworlds.dev/docs/api/148c48f13851f-get-all-users-per-course
+     */
+    public function get_users_per_course($learnworlds_course_id)
+    {
+        $vec_output = [];
+        $learnworlds_course_model = LearnworldsCourse::findOne($learnworlds_course_id);
+        if ( ! $learnworlds_course_model )
+        {
+            $learnworlds_course_model = $this->get_course($learnworlds_course_id);
+        }
+
+        if ( $learnworlds_course_model )
+        {
+            // Send a "GET /v2/courses/{id}/courses" request
+            $response = $this->api->get_users_per_course($learnworlds_course_model->learnworlds_course_id);
+
+            // Update the model with last received data
+            if ( $this->api->is_last_action_success() )
+            {
+                $vec_response = $this->api->get_response_body(true);
+
+                if ( $this->is_debug )
+                {
+                    Log::learnworlds_dev("LearnworldsComponent::get_users_per_course({$learnworlds_course_id}) - Last action success");
+                    Log::learnworlds_dev(print_r($vec_response, true));
+                }
+
+                return $vec_response;
+
+                /*
+                // Create/update enrollments (LearnworldsCourseUser models)
+                if ( !empty($vec_response) && isset($vec_response['data']) )
+                {
+                    if ( !empty($vec_response['data']) )
+                    {
+
+                    }
+                }
+                else if ( $this->is_debug )
+                {
+                    Log::learnworlds_dev("LearnworldsComponent::get_users_per_course({$learnworlds_course_id}) - Incorrect response: ". print_r($vec_response, true));
+                }
+                */
+            }
+            else if ( $this->is_debug )
+            {
+                Log::learnworlds_dev("LearnworldsComponent::get_users_per_course({$learnworlds_course_id}) - Last action error: ". print_r($this->api->get_last_error(), true));
+            }
+        }
+        else
+        {
+            if ( ! $learnworlds_course_model )
+            {
+                Log::learnworlds_error("LearnworldsComponent::get_users_per_course({$learnworlds_course_id}) - LEARNWORLDS COURSE does not exist for course {$learnworlds_course_id}");
+            }
+        }
+
+        return $vec_output;
+    }
+
+
+    /**
      * Enroll user to a course (product)
      *
      * - API REST Endpoint "POST /v2/users/{id}/enrollment"
@@ -538,7 +604,7 @@ class LearnworldsComponent extends ApplicationComponent
     /**
      * Get products (couses enrollments) of user.
      *
-     * - API REST Endpoint "POST /v2/users/{id}/products"
+     * - API REST Endpoint "GET /v2/users/{id}/products"
      *
      * @see https://learnworlds.dev/docs/api/7e63f13919cdd-get-courses-enrollments-of-user
      */

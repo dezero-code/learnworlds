@@ -31,6 +31,9 @@ class SsoController extends Controller
             // Return user information
             // dd(Yii::app()->learnworlds->get_user(2115, '630e29b8f4d2cfe0e900eb7b'));
 
+            // Return a list of users enrolled in a course
+            // dd(Yii::app()->learnworlds->get_users_per_course('curso-de-prueba'));
+
             // Return a full list of courses
             // $learnworlds_course_model = Yii::app()->learnworlds->get_course('curso-de-prueba'));
             dd(Yii::app()->learnworlds->get_courses());

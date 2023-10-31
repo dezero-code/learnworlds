@@ -257,6 +257,28 @@ class LearnworldsApi extends RestClient
 
 
     /**
+     * Returns all the users enrolled in a course
+     *
+     * - API REST Endpoint "GET /v2/courses/{id}/users"
+     *
+     * @see https://learnworlds.dev/docs/api/148c48f13851f-get-all-users-per-course
+     */
+    public function get_users_per_course($learnworlds_course_id)
+    {
+        // Endpoint and entity information
+        $this->entity_type = 'LearnworldsCourse';
+        $this->entity_id = $learnworlds_course_id;
+        $endpoint_uri = '/v2/courses/'. $learnworlds_course_id .'/users';
+
+        // Save last used endpoint
+        $this->last_endpoint = $endpoint_uri;
+
+        // Send request
+        return $this->get($endpoint_uri);
+    }
+
+
+    /**
      * Enroll user to product, regarding course, bundle, manual subscription
      *
      * - API REST Endpoint "POST /v2/users/{id}/enrollment"
