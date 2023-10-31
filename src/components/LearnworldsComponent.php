@@ -389,7 +389,7 @@ class LearnworldsComponent extends ApplicationComponent
      *
      * @see https://learnworlds.dev/docs/api/148c48f13851f-get-all-users-per-course
      */
-    public function get_users_per_course($learnworlds_course_id)
+    public function get_users_per_course($learnworlds_course_id, $vec_input = [])
     {
         $vec_output = [];
         $learnworlds_course_model = LearnworldsCourse::findOne($learnworlds_course_id);
@@ -401,7 +401,7 @@ class LearnworldsComponent extends ApplicationComponent
         if ( $learnworlds_course_model )
         {
             // Send a "GET /v2/courses/{id}/courses" request
-            $response = $this->api->get_users_per_course($learnworlds_course_model->learnworlds_course_id);
+            $response = $this->api->get_users_per_course($learnworlds_course_model->learnworlds_course_id, $vec_input);
 
             // Update the model with last received data
             if ( $this->api->is_last_action_success() )

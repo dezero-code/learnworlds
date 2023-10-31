@@ -263,7 +263,7 @@ class LearnworldsApi extends RestClient
      *
      * @see https://learnworlds.dev/docs/api/148c48f13851f-get-all-users-per-course
      */
-    public function get_users_per_course($learnworlds_course_id)
+    public function get_users_per_course($learnworlds_course_id, $vec_input = [])
     {
         // Endpoint and entity information
         $this->entity_type = 'LearnworldsCourse';
@@ -274,7 +274,7 @@ class LearnworldsApi extends RestClient
         $this->last_endpoint = $endpoint_uri;
 
         // Send request
-        return $this->get($endpoint_uri);
+        return $this->get($endpoint_uri, $vec_input);
     }
 
 
